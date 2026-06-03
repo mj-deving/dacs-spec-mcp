@@ -1,0 +1,31 @@
+{
+  "name": "dacs-spec-mcp-server",
+  "version": "0.1.0",
+  "description": "Read-only MCP server exposing the DACS (Demos Agent Commerce Standards) v0.1 spec — by section, rule family, artifact-defining section, and §14 conformance vector. Generate-from-source / no-drift: serves a build-time index from a pinned spec commit, version-stamped. Proposed / non-normative ecosystem tooling.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "bin": {
+    "dacs-spec-mcp": "src/server.ts"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build-index": "bun scripts/build-index.ts",
+    "prebuild": "bun scripts/build-index.ts",
+    "build": "bun scripts/build-index.ts && tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "start": "bun src/server.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "typescript": "^6.0.3"
+  }
+}

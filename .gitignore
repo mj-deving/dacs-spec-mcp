@@ -1,0 +1,7 @@
+node_modules
+dist
+*.log
+.DS_Store
+
+# The generated index is COMMITTED on purpose (CI-freshness-gated, no-drift).
+# Do NOT ignore src/generated/spec-index.json.

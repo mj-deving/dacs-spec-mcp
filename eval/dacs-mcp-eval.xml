@@ -1,0 +1,49 @@
+<evaluation>
+  <!--
+    mcp-builder Phase 4 acceptance gate for dacs-spec-mcp-server.
+    10 read-only, independent, realistic questions; each answerable only by using
+    the server's tools/resources against the pinned DACS spec index (commit 85ff7a9).
+    Every answer was independently verified against src/generated/spec-index.json
+    and is asserted in the test suite's "eval execution" block.
+  -->
+  <qa_pair>
+    <question>Using the DACS spec-reference server, find the dispute-resolution section of the DACS standard and report that section's exact title.</question>
+    <answer>Dispute resolution (DACS-X, anticipated)</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>According to the DACS conformance vector with id "dispute-rule-swap-fail", what is the expected result (the "want" value)?</question>
+    <answer>fail</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Which DACS spec section number is the defining section for the AgreementDocument artifact?</question>
+    <answer>8.5</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>In the DACS conformance pack served by the server, how many vectors have "golden" status?</question>
+    <answer>24</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>In the DACS conformance pack served by the server, how many vectors have "candidate" status?</question>
+    <answer>18</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>The DACS conformance vector "sig-registry-closed-16" asserts that the signature domain-separator registry is a closed set of a fixed size. What integer is its expected result?</question>
+    <answer>16</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>How many conformance vector cases in total (golden plus candidate) does the DACS conformance pack served by the server contain?</question>
+    <answer>42</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>The DACS signed artifact whose defining section is §10.4 — what is that artifact's name?</question>
+    <answer>AttestationBundle</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>What is the status (golden or candidate) of the DACS conformance vector with id "disclosure-wrong-recipient-fail"?</question>
+    <answer>candidate</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Search the DACS spec for the hashed-timelock free-option disclosure rule. Which HTLC rule token discloses (but does not remedy) the payer's free option in a basic HTLC swap?</question>
+    <answer>HTLC-10</answer>
+  </qa_pair>
+</evaluation>

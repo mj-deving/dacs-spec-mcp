@@ -1,0 +1,89 @@
+name: spec-sync
+
+# No-drift gate. The CORRECTNESS job (blocking) proves the committed index is
+# faithful to its pinned spec commit. The STALENESS job (advisory) reports when
+# the upstream spec has moved past the pin — a maintenance signal, never a failure.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  correctness:
+    name: index is faithful to the pinned commit (blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+        with:
+          path: mcp
+
+      - name: Read pinned commit from the committed index
+        id: pin
+        run: |
+          PIN=$(jq -r .specCommit mcp/src/generated/spec-index.json)
+          echo "commit=$PIN" >> "$GITHUB_OUTPUT"
+          echo "Pinned spec commit: $PIN"
+
+      - name: Checkout DACS spec at the pinned commit
+        uses: actions/checkout@v4
+        with:
+          repository: DACS-Agent-commerce/DACS-Standard
+          ref: ${{ steps.pin.outputs.commit }}
+          path: spec-repo
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install deps
+        working-directory: mcp
+        run: bun install --frozen-lockfile
+
+      - name: Content-hash lock (pin is a lock, not a label)
+        working-directory: mcp
+        env:
+          DACS_SPEC_REPO: ${{ github.workspace }}/spec-repo
+        run: bun scripts/check-index.ts
+
+      - name: Rebuild index from the pin and assert no drift (modulo generatedAt)
+        working-directory: mcp
+        env:
+          DACS_SPEC_REPO: ${{ github.workspace }}/spec-repo
+        run: |
+          cp src/generated/spec-index.json /tmp/committed.json
+          bun run build-index
+          jq 'del(.generatedAt)' /tmp/committed.json > /tmp/a.json
+          jq 'del(.generatedAt)' src/generated/spec-index.json > /tmp/b.json
+          if ! diff -u /tmp/a.json /tmp/b.json; then
+            echo "::error::Committed index drifted from a fresh rebuild at the pin. Run 'bun run build-index' and commit."
+            exit 1
+          fi
+          echo "Index is byte-faithful to the pinned spec."
+
+      - name: Typecheck + tests
+        working-directory: mcp
+        run: |
+          bun run typecheck
+          bun test
+
+  staleness:
+    name: upstream spec moved past the pin (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: mcp
+      - name: Pin vs upstream HEAD
+        run: |
+          PIN=$(jq -r .specCommit mcp/src/generated/spec-index.json)
+          HEAD=$(git ls-remote https://github.com/DACS-Agent-commerce/DACS-Standard.git main | cut -f1)
+          echo "pin=$PIN head=$HEAD"
+          if [ "$PIN" != "$HEAD" ]; then
+            echo "::warning::DACS spec HEAD ($HEAD) is ahead of the pin ($PIN). Consider bumping the pin and regenerating the index."
+          else
+            echo "Pin is current with upstream main."
+          fi
